@@ -1,0 +1,120 @@
+[
+  {
+    "step_id": "STEP-01",
+    "step_name": "Operand Range Validation",
+    "category": "ERROR_VALIDATION",
+    "target_test_vector": "Invalidation / Out of Bounds",
+    "relevant_paragraphs": [
+      "3000-ADDITION-PARA",
+      "0000-MAIN-PARA"
+    ],
+    "external_connections": [
+      {
+        "system": "NONE",
+        "field": "N/A",
+        "expected_value": "N/A",
+        "mock_payload": null
+      }
+    ],
+    "test_cases": [
+      {
+        "test_id": "STEP-01-TC-01",
+        "description": "Generated test case for Operand Range Validation",
+        "inputs": {
+          "WS-OPERAND-A": 0,
+          "WS-OPERAND-B": -5000000.01
+        },
+        "expected_outputs": {
+          "STATUS_CODE": "40",
+          "WS-STATUS-CODE": "'40' (STATUS-OUT-OF-RANGE)"
+        },
+        "external_mocks": {}
+      }
+    ]
+  },
+  {
+    "step_id": "STEP-02",
+    "step_name": "Zero Shortcut",
+    "category": "HAPPY_SHORTCUT",
+    "target_test_vector": "Trivial Zero Path / Shortcut",
+    "relevant_paragraphs": [
+      "3000-ADDITION-PARA"
+    ],
+    "external_connections": [
+      {
+        "system": "NONE",
+        "field": "N/A",
+        "expected_value": "N/A",
+        "mock_payload": null
+      }
+    ],
+    "test_cases": [
+      {
+        "test_id": "STEP-02-TC-01",
+        "description": "Generated test case for Zero Shortcut",
+        "inputs": {
+          "WS-OPERAND-A": 0,
+          "WS-OPERAND-B": 0
+        },
+        "expected_outputs": {
+          "STATUS_CODE": "00",
+          "WS-RESULT": 0
+        },
+        "external_mocks": {}
+      }
+    ]
+  },
+  {
+    "step_id": "STEP-03",
+    "step_name": "Add Operands",
+    "category": "HAPPY_NOMINAL",
+    "target_test_vector": "Nominal & Boundary (A=B=+5000000.00 -> 10000000.00; A=B=-5000000.00 -> -10000000.00; A=0,B!=0; negatives; A=-B)",
+    "relevant_paragraphs": [
+      "3000-ADDITION-PARA",
+      "0000-MAIN-PARA"
+    ],
+    "external_connections": [
+      {
+        "system": "NONE",
+        "field": "N/A",
+        "expected_value": "N/A",
+        "mock_payload": null
+      }
+    ],
+    "test_cases": [
+      {
+        "test_id": "STEP-03-TC-01",
+        "description": "Generated test case for Add Operands",
+        "inputs": {
+          "WS-OPERAND-A": -0.01,
+          "WS-OPERAND-B": -0.01
+        },
+        "expected_outputs": {
+          "STATUS_CODE": "00",
+          "WS-RESULT": -0.02
+        },
+        "external_mocks": {}
+      }
+    ]
+  },
+  {
+    "step_id": "STEP-04",
+    "step_name": "Overflow / Size Error Check",
+    "category": "EXCEPTION",
+    "target_test_vector": "Exception / Overflow (defensive, unreachable under range validation)",
+    "relevant_paragraphs": [
+      "3000-ADDITION-PARA"
+    ],
+    "external_connections": [
+      {
+        "system": "NONE",
+        "field": "N/A",
+        "expected_value": "N/A",
+        "mock_payload": null
+      }
+    ],
+    "test_cases": [],
+    "reachable": false,
+    "proof": "UNSAT: Path is mathematically unreachable under prerequisite range validations."
+  }
+]

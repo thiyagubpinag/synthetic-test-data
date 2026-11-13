@@ -3,3 +3,7 @@
 
 # Bob Z Extension - Local data dictionary
 DD.json
+
+# Python bytecode
+__pycache__/
+*.pyc

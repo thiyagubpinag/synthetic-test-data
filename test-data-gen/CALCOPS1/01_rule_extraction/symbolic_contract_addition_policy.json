@@ -1,0 +1,66 @@
+{
+  "rule_heading": "2.3.1 Business Rule: Addition Policy",
+  "rule_id": "BR-ADD-2.3.1",
+  "rule_name": "Addition Policy",
+  "program": "CALCOPS1",
+  "source_brd": "docs/business-rule/cobol/CALCOPS1-overview.md",
+  "domain": {
+    "WS-OPERAND-A": "PIC S9(7)V99 COMP-3",
+    "WS-OPERAND-B": "PIC S9(7)V99 COMP-3",
+    "WS-RESULT": "PIC S9(9)V99 COMP-3",
+    "WS-MAX-OPERAND": "+5000000.00",
+    "WS-MIN-OPERAND": "-5000000.00",
+    "status_codes": { "OK": "00", "OVERFLOW": "10", "OUT_OF_RANGE": "40" }
+  },
+  "contract_steps": [
+    {
+      "step_id": "STEP-01",
+      "step_name": "Operand Range Validation",
+      "category": "ERROR_VALIDATION",
+      "logical_condition": "WS-OPERAND-A > WS-MAX-OPERAND OR WS-OPERAND-A < WS-MIN-OPERAND OR WS-OPERAND-B > WS-MAX-OPERAND OR WS-OPERAND-B < WS-MIN-OPERAND  (MAX=+5000000.00, MIN=-5000000.00)",
+      "smt_action": "WS-STATUS-CODE = '40' (STATUS-OUT-OF-RANGE); WS-RESULT unchanged",
+      "target_test_vector": "Invalidation / Out of Bounds",
+      "relevant_paragraphs": ["3000-ADDITION-PARA", "0000-MAIN-PARA"],
+      "external_connections": [
+        { "system": "NONE", "field": "N/A", "expected_value": "N/A" }
+      ]
+    },
+    {
+      "step_id": "STEP-02",
+      "step_name": "Zero Shortcut",
+      "category": "HAPPY_SHORTCUT",
+      "logical_condition": "InRange(A) AND InRange(B) AND WS-OPERAND-A == 0 AND WS-OPERAND-B == 0",
+      "smt_action": "WS-RESULT = 0; WS-STATUS-CODE = '00' (STATUS-OK)",
+      "target_test_vector": "Trivial Zero Path / Shortcut",
+      "relevant_paragraphs": ["3000-ADDITION-PARA"],
+      "external_connections": [
+        { "system": "NONE", "field": "N/A", "expected_value": "N/A" }
+      ]
+    },
+    {
+      "step_id": "STEP-03",
+      "step_name": "Add Operands",
+      "category": "HAPPY_NOMINAL",
+      "logical_condition": "InRange(A) AND InRange(B) AND NOT (WS-OPERAND-A == 0 AND WS-OPERAND-B == 0)",
+      "smt_action": "WS-RESULT = WS-OPERAND-A + WS-OPERAND-B; WS-STATUS-CODE = '00' (NOT ON SIZE ERROR)",
+      "target_test_vector": "Nominal & Boundary (A=B=+5000000.00 -> 10000000.00; A=B=-5000000.00 -> -10000000.00; A=0,B!=0; negatives; A=-B)",
+      "relevant_paragraphs": ["3000-ADDITION-PARA", "0000-MAIN-PARA"],
+      "external_connections": [
+        { "system": "NONE", "field": "N/A", "expected_value": "N/A" }
+      ]
+    },
+    {
+      "step_id": "STEP-04",
+      "step_name": "Overflow / Size Error Check",
+      "category": "EXCEPTION",
+      "logical_condition": "InRange(A) AND InRange(B) AND NOT (A == 0 AND B == 0) AND ABS(A + B) > 999999999.99  [UNSAT: max in-range |A+B| = 10000000.00]",
+      "smt_action": "WS-STATUS-CODE = '10' (STATUS-OVERFLOW)",
+      "target_test_vector": "Exception / Overflow (defensive, unreachable under range validation)",
+      "relevant_paragraphs": ["3000-ADDITION-PARA"],
+      "reachable": false,
+      "external_connections": [
+        { "system": "NONE", "field": "N/A", "expected_value": "N/A" }
+      ]
+    }
+  ]
+}

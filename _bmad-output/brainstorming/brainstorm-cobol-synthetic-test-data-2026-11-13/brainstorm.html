@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complex COBOL Structure Test Data Pipeline - Brainstorming Keepsake</title>
+    <style>
+        :root {
+            --bg: #0a0f1d;
+            --surface: #111827;
+            --surface-hover: #1f2937;
+            --border: #374151;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+            --accent: #10b981;
+            --secondary: #3b82f6;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tag {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .synthesis-section {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.05));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .synthesis-section h2 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .synthesis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .synthesis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .synthesis-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .synthesis-card h3 {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .synthesis-card p {
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .technique-group {
+            margin-bottom: 2.5rem;
+        }
+
+        .technique-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .technique-header:hover {
+            background: var(--surface-hover);
+        }
+
+        .technique-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .technique-badge {
+            font-size: 0.75rem;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--secondary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 0.1rem 0.5rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .idea-list {
+            background: rgba(17, 24, 39, 0.5);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1.5rem;
+        }
+
+        .idea-item {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(55, 65, 81, 0.5);
+        }
+
+        .idea-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .idea-number {
+            color: var(--accent);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 1rem;
+            min-width: 2rem;
+        }
+
+        .idea-text {
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .visualization {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px dashed var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .visual-bar {
+            height: 20px;
+            background: #3b82f6;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            position: relative;
+            text-align: center;
+            color: white;
+            font-size: 0.75rem;
+            line-height: 20px;
+        }
+
+        .visual-bar.redefines {
+            background: #10b981;
+        }
+
+        .visual-bar.filler {
+            background: #4b5563;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 5rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="tag">Brainstorming Session complete</div>
+            <h1>Complex COBOL Structures</h1>
+            <p class="subtitle">A comprehensive strategy for deterministic symbolic execution and synthetic data generation covering REDEFINES, OCCURS DEPENDING ON, and COMP-3 data structures.</p>
+        </header>
+
+        <!-- SYNTHESIS CLIMAX -->
+        <section class="synthesis-section">
+            <h2>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                Synthesis & Central Discoveries
+            </h2>
+            <p>We ran 10 creative techniques generating 100 deep technical ideas. The critical breakthrough is realizing that <strong>COBOL data structure parsing and procedure validation are not distinct problems, but are unified by memory offsets and path execution boundaries.</strong></p>
+            
+            <div class="synthesis-grid">
+                <div class="synthesis-card">
+                    <h3>The Memory Overlay Paradigm</h3>
+                    <p>Instead of mapping REDEFINES to mutually exclusive flat JSON properties, the pipeline must implement a <strong>byte-level memory simulator using Python's <code>memoryview</code> and <code>ctypes.Union</code></strong>. This overlays different fields over the exact same underlying byte buffer, guaranteeing that generating a value for an Inquiry layout automatically, correctly formats the shared fields for Update and Add layouts.</p>
+                </div>
+                <div class="synthesis-card">
+                    <h3>Symbolic Path Solver (Z3 Integration)</h3>
+                    <p>By transforming procedural logic (IF, EVALUATE) into a set of declarative constraints and routing them to a constraint solver (like Z3), the system can <strong>automatically calculate the exact values needed to trigger a specific functional path</strong>, even inside complex loops or nested level-88 conditional groups.</p>
+                </div>
+                <div class="synthesis-card">
+                    <h3>Strict Mainframe Codecs</h3>
+                    <p>To avoid standard S0C7 abends, the generator includes custom serializers for signed COMP-3 packed decimals (incorporating the low-order trailing sign nibble <code>C/D/F</code>) and EBCDIC zoned decimal sign conversions, producing valid mainframe commarea blocks every single run.</p>
+                </div>
+                <div class="synthesis-card">
+                    <h3>Autonomous Coverage KPI</h3>
+                    <p>The system uses AST parsing of the Procedure Division to establish a <strong>Rule-to-Test Case Traceability Matrix</strong>, dynamically reporting exactly how many procedural paths are covered by the generated synthetic dataset.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TECHNIQUES AND IDEAS -->
+
+        <!-- 1. How Might We -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 1</span>
+                    How Might We Reframing
+                </div>
+            </div>
+            <div class="idea-list">
+                <div class="idea-item">
+                    <div class="idea-number">HMW-01</div>
+                    <div class="idea-text">HMW parse multi-level REDEFINES without losing track of overlapping byte offsets?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-02</div>
+                    <div class="idea-text">HMW handle OCCURS DEPENDING ON (variable arrays) deterministically in a fixed-width output?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-03</div>
+                    <div class="idea-text">HMW convert signed COMP-3 packed decimals into realistic float values in Python and back to binary?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-04</div>
+                    <div class="idea-text">HMW automatically identify which REDEFINES paths are "active" based on other control fields like CA-REQUEST-ID?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-05</div>
+                    <div class="idea-text">HMW handle deep procedurally checked constraints inside nested loops?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-06</div>
+                    <div class="idea-text">HMW handle FILLER fields to ensure the byte offsets line up exactly with the copybook specification?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-07</div>
+                    <div class="idea-text">HMW generate valid cross-field dependencies, e.g. ensuring policy dates are after issue dates?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-08</div>
+                    <div class="idea-text">HMW isolate and test single error paths (e.g. duplicate policy keys) without breaking structural rules?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-09</div>
+                    <div class="idea-text">HMW detect and handle level-88 conditional enums that overlap or have complex range boundaries?</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">HMW-10</div>
+                    <div class="idea-text">HMW model index-based tables (OCCURS ... INDEXED BY) inside the generated dataset?</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Constraint Mapping -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 2</span>
+                    Constraint Mapping
+                </div>
+            </div>
+            <div class="idea-list">
+                <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">Identifying and converting physical mainframe structures into direct architectural solutions.</p>
+                <div class="idea-item">
+                    <div class="idea-number">CON-01</div>
+                    <div class="idea-text"><strong>Constraint: Strict EBCDIC byte alignment.</strong> Solution: Use a shadow byte-level memory buffer in Python to represent the raw Commarea.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-02</div>
+                    <div class="idea-text"><strong>Constraint: Overlapping memory (REDEFINES).</strong> Solution: Define 'Views' in the Python generator that overlay the same underlying bytearray.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-03</div>
+                    <div class="idea-text"><strong>Constraint: COMP-3 Packed Decimals (hex representation).</strong> Solution: Build a dedicated codecs class in the Python generator to serialize/deserialize COMP-3.</div>
+                </div>
+                <div class="visualization">
+                    <div>COMP-3 Serialization Memory Layout:</div>
+                    <div style="display:flex; gap: 4px; margin-top: 5px;">
+                        <span style="background:var(--accent); color:black; padding:2px 6px; border-radius:3px;">Hex digit 1</span>
+                        <span style="background:var(--accent); color:black; padding:2px 6px; border-radius:3px;">Hex digit 2</span>
+                        <span style="background:var(--accent); color:black; padding:2px 6px; border-radius:3px;">Hex digit 3</span>
+                        <span style="background:var(--warning); color:black; padding:2px 6px; border-radius:3px;">Sign Nibble (C/D/F)</span>
+                    </div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-04</div>
+                    <div class="idea-text"><strong>Constraint: Variable-length tables (OCCURS DEPENDING ON).</strong> Solution: Dynamically compute the total record size based on the ODO control field value.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-05</div>
+                    <div class="idea-text"><strong>Constraint: Strict alphanumeric padding.</strong> Solution: Apply custom trailing-space or leading-zero decorators to all fields during generation.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-06</div>
+                    <div class="idea-text"><strong>Constraint: Level-88 conditionals.</strong> Solution: Map Level-88 items directly to enum-like validator classes in the Python script.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-07</div>
+                    <div class="idea-text"><strong>Constraint: Large FILLER fields.</strong> Solution: Treat FILLERs as black-box byte arrays populated with high-order/low-order values or spaces, based on a configuration flag.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-08</div>
+                    <div class="idea-text"><strong>Constraint: Sign representation in PIC S9.</strong> Solution: Implement EBCDIC zoned decimal sign conversion (overpunched signs like '{' or '}') in the generator.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-09</div>
+                    <div class="idea-text"><strong>Constraint: DB2 NULL indicator variables.</strong> Solution: Prepend or append -1/-2 binary indicators to DB2 mapped fields in the buffer.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">CON-10</div>
+                    <div class="idea-text"><strong>Constraint: Custom collating sequences.</strong> Solution: Add EBCDIC-to-ASCII collation mapping for sorting-based business validations.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Assumption Reversal -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 3</span>
+                    Assumption Reversal
+                </div>
+            </div>
+            <div class="idea-list">
+                <div class="idea-item">
+                    <div class="idea-number">REV-01</div>
+                    <div class="idea-text"><strong>Assumption: "Each program run expects a single flat record."</strong> Reversal: The pipeline generates hierarchical/nested transaction streams.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-02</div>
+                    <div class="idea-text"><strong>Assumption: "The copybook is 100% accurate."</strong> Reversal: The generator dynamically scans the PROCEDURE DIVISION to find undeclared layout fields.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-03</div>
+                    <div class="idea-text"><strong>Assumption: "Synthetic data must only be valid."</strong> Reversal: Generate "mutation" records that deliberately violate physical types to test mainframe error-handling blocks.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-04</div>
+                    <div class="idea-text"><strong>Assumption: "Deterministic generation requires hardcoding."</strong> Reversal: Use a constraint solver (like Z3 or a mini-SAT solver) in Python to dynamically find valid field combinations.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-05</div>
+                    <div class="idea-text"><strong>Assumption: "Test data must be loaded via files."</strong> Reversal: Generate standard CICS Commarea calling buffers that can be injected directly via EXCI (External CICS Interface).</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-06</div>
+                    <div class="idea-text"><strong>Assumption: "REDEFINES are mutually exclusive."</strong> Reversal: Generate test records that partially overlap or test transition states where a buffer is repurposed mid-flight.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-07</div>
+                    <div class="idea-text"><strong>Assumption: "User selects functionality manually."</strong> Reversal: AI uses procedural code coverage analysis to automatically suggest and prioritize which functionality/path to test.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-08</div>
+                    <div class="idea-text"><strong>Assumption: "Fillers are always empty."</strong> Reversal: Populate FILLER fields with cryptographic signatures or transaction lineage IDs to track test data flow.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-09</div>
+                    <div class="idea-text"><strong>Assumption: "One record covers one test case."</strong> Reversal: Combine multiple independent test cases into a single chained transaction block.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">REV-10</div>
+                    <div class="idea-text"><strong>Assumption: "Only valid dates can be used."</strong> Reversal: Generate high-risk date edge cases (e.g. 9999-12-31, 0001-01-01, Feb 29 on non-leap years) to test legacy date routines.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. SCAMPER Method -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 4</span>
+                    SCAMPER Method
+                </div>
+            </div>
+            <div class="idea-list">
+                <div class="idea-item">
+                    <div class="idea-number">SCA-01</div>
+                    <div class="idea-text"><strong>Substitute:</strong> Replace traditional random data generation with deterministic rule-based generators using a fixed seed (e.g. LCG or Mersenne Twister).</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-02</div>
+                    <div class="idea-text"><strong>Combine:</strong> Merge rule extraction metadata and test case scenarios into a single executable Jupyter notebook for interactive debugging.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-03</div>
+                    <div class="idea-text"><strong>Adapt:</strong> Adapt compiler-level AST parsing techniques (like those used in GnuCOBOL) to extract the data offsets and sizes directly.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-04</div>
+                    <div class="idea-text"><strong>Modify:</strong> Extend the standard Python generator class with dynamic validation decorators (@validator('CA-CUSTOMER-NUM')) that run before writing bytes.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-05</div>
+                    <div class="idea-text"><strong>Put to other use:</strong> Use the extracted business rule specification to auto-generate OpenAPI/Swagger specs for COBOL-to-REST APIs.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-06</div>
+                    <div class="idea-text"><strong>Eliminate:</strong> Eliminate manual copybook modeling by auto-generating complete dataclasses or Pydantic models directly representing the COBOL fields.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-07</div>
+                    <div class="idea-text"><strong>Reverse:</strong> Reverse-engineer existing real-world transactional data to automatically seed constraints in the synthetic rule specification.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-08</div>
+                    <div class="idea-text"><strong>Substitute:</strong> Substitute manual rule mapping with automatic canonical rule extraction from procedural branches (IF/ELSE, EVALUATE).</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-09</div>
+                    <div class="idea-text"><strong>Combine:</strong> Combine visual traceability HTML dashboards with interactive data editors so developers can fine-tune generated records.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">SCA-10</div>
+                    <div class="idea-text"><strong>Modify:</strong> Modify the symbolic execution phase to automatically generate boundary cases for every single PIC 9 clause (e.g. 0, 999, negative if signed).</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Decision Tree Mapping -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 5</span>
+                    Decision Tree Mapping
+                </div>
+            </div>
+            <div class="idea-list">
+                <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">Charting CICS execution paths based on incoming request metadata variables.</p>
+                <div class="visualization">
+                    <div>CICS Transaction Branching Tree:</div>
+                    <div style="margin-left: 20px; border-left: 2px solid var(--border); padding-left: 10px; margin-top: 5px;">
+                        <div>[DFHCOMMAREA]</div>
+                        <div style="border-left: 2px solid var(--accent); padding-left: 10px; margin-top: 5px;">
+                            <div>├── CA-REQUEST-ID == '01INQ' (Activate Customer Inquiry)</div>
+                            <div>├── CA-REQUEST-ID == '01UPD' (Activate Customer Update)</div>
+                            <div>└── CA-REQUEST-ID == '01ADD' (Activate Customer Add)</div>
+                        </div>
+                        <div style="border-left: 2px solid var(--secondary); padding-left: 10px; margin-top: 5px;">
+                            <div>└── CA-POLICY-SPECIFIC (Overlay structures based on Policy type)</div>
+                            <div style="margin-left: 10px;">
+                                ├── 'E' -> CA-ENDOWMENT (With Profits, Fund Name, life assured)<br>
+                                ├── 'H' -> CA-HOUSE (Property Type, Value, post code)<br>
+                                ├── 'M' -> CA-MOTOR (Make, Model, reg number, premium)<br>
+                                └── 'C' -> CA-COMMERCIAL (Address, Fire/Crime/Flood premiums)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-01</div>
+                    <div class="idea-text">Map: Branching based on CA-REQUEST-ID. Branch 1: '01INQ' -> Activate Customer Inquiry layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-02</div>
+                    <div class="idea-text">Map: Branching based on CA-REQUEST-ID. Branch 2: '01UPD' -> Activate Customer Update layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-03</div>
+                    <div class="idea-text">Map: Branching based on CA-REQUEST-ID. Branch 3: '01ADD' -> Activate Customer Add layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-04</div>
+                    <div class="idea-text">Map: Branching based on policy types (CA-POLICY-SPECIFIC). Branch 1: 'E' -> Endowment policy layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-05</div>
+                    <div class="idea-text">Map: Branching based on policy types (CA-POLICY-SPECIFIC). Branch 2: 'H' -> House policy layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-06</div>
+                    <div class="idea-text">Map: Branching based on policy types (CA-POLICY-SPECIFIC). Branch 3: 'M' -> Motor policy layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-07</div>
+                    <div class="idea-text">Map: Branching based on policy types (CA-POLICY-SPECIFIC). Branch 4: 'C' -> Commercial policy layout.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-08</div>
+                    <div class="idea-text">Map: Procedural branch: 'IF CA-CUSTOMER-NUM IS NOT NUMERIC'. Path 1: Raise Error 10. Path 2: Continue.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-09</div>
+                    <div class="idea-text">Map: Procedural branch: 'EVALUATE CA-CUSTSECR-STATE'. Branch 'A': Active, 'S': Suspended, 'D': Deleted.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAP-10</div>
+                    <div class="idea-text">Map: Procedural branch: 'IF CA-H-VALUE > 10000000'. Path 1: High value policy approval workflow. Path 2: Normal policy.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Worst Possible Idea -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 6</span>
+                    Worst Possible Idea & Inversions
+                </div>
+            </div>
+            <div class="idea-list">
+                <div class="idea-item">
+                    <div class="idea-number">WST-01</div>
+                    <div class="idea-text"><strong>Bad: Hardcode all data values directly in a text file and rename it.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Use a schema-driven generator that decouples data structures from specific values.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-02</div>
+                    <div class="idea-text"><strong>Bad: Generate completely random bytes of random lengths and dump them into the CICS buffer.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Enforce exact byte-by-byte padding and alignment constraints to prevent CICS abends.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-03</div>
+                    <div class="idea-text"><strong>Bad: Extract no rules and just ask the LLM to guess the test cases.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Use strict AST-based parsing and procedural analysis to guarantee 100% rule coverage.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-04</div>
+                    <div class="idea-text"><strong>Bad: Treat all REDEFINES as completely independent flat records and write them into different files.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Implement a single overlay data structure that reflects the real physical memory re-use.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-05</div>
+                    <div class="idea-text"><strong>Bad: Ignore COMP-3 and just write numbers as ASCII text.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Build a robust binary packer that serializes numbers to hex/COMP-3 format.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-06</div>
+                    <div class="idea-text"><strong>Bad: Generate the same name "John Doe" for all 1000 records.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Integrate realistic locale-specific data providers like Faker or customized dictionary lists.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-07</div>
+                    <div class="idea-text"><strong>Bad: Ignore dates and just use "2026-11-13" for everything.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Build a dedicated temporal generator that respects business rules like policy start/end relationships.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-08</div>
+                    <div class="idea-text"><strong>Bad: Do not allow the user to review or change the specification.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Create an interactive review checkpoint with direct JSON-edit capabilities.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-09</div>
+                    <div class="idea-text"><strong>Bad: Write the data generation script in a legacy scripting language that nobody knows.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Generate readable, standard, and highly customizable Python scripts.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WST-10</div>
+                    <div class="idea-text"><strong>Bad: Make the generated data completely non-deterministic so it's different every run.</strong> <br><span style="color: var(--accent);">→ Flip:</span> Enforce fixed random seeding so test execution is 100% reproducible.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Solution Matrix -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 7</span>
+                    Solution Matrix
+                </div>
+            </div>
+            <div class="idea-list">
+                <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">Direct pairings of COBOL variable structures with specific software implementation methodologies.</p>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-01</div>
+                    <div class="idea-text">Pair: REDEFINES with "Union/Overlay class structures in Python".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-02</div>
+                    <div class="idea-text">Pair: COMP-3 with "struct.pack / struct.unpack binary libraries in Python".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-03</div>
+                    <div class="idea-text">Pair: Level-88 with "Enum mapping inside Pydantic models".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-04</div>
+                    <div class="idea-text">Pair: OCCURS with "List containers with fixed padding bounds".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-05</div>
+                    <div class="idea-text">Pair: OCCURS DEPENDING ON with "Dynamic list resizing linked to the control field validator".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-06</div>
+                    <div class="idea-text">Pair: Signed Decimals with "Zoned Decimal encoding / decoding dictionary".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-07</div>
+                    <div class="idea-text">Pair: Numeric Overflow with "Boundary analysis (Value = Max + 1) producing truncated/wrapped fields".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-08</div>
+                    <div class="idea-text">Pair: Cross-field constraints with "SAT solver / Z3 Theorem Prover constraint engine".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-09</div>
+                    <div class="idea-text">Pair: Database Foreign Keys with "Parent-Child relational data linker".</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">MAT-10</div>
+                    <div class="idea-text">Pair: CICS Commarea with "Hex-encoded flat buffer generator".</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Five Whys -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 8</span>
+                    Five Whys Root Cause Analysis
+                </div>
+            </div>
+            <div class="idea-list">
+                <div class="idea-item">
+                    <div class="idea-number">WHY-01</div>
+                    <div class="idea-text"><strong>Why do CICS programs abend on synthetic data?</strong> Because the byte alignment of the fields is off.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WHY-02</div>
+                    <div class="idea-text"><strong>Why is the byte alignment off?</strong> Because FILLER fields and REDEFINES are not modeled with precise length calculations.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WHY-03</div>
+                    <div class="idea-text"><strong>Why are they not modeled precisely?</strong> Because the parsing engine ignores the raw character offsets and relies solely on field order.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WHY-04</div>
+                    <div class="idea-text"><strong>Why does it rely on field order?</strong> Because it does not calculate absolute start and end indices for each variable in the COBOL structure.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">WHY-05</div>
+                    <div class="idea-text"><strong>Why doesn't it calculate absolute offsets?</strong> Because it lacks a memory layout engine that simulates the mainframe's physical storage layout (e.g. COMP vs COMP-3 vs DISPLAY spacing).</div>
+                </div>
+                <div class="idea-item" style="border-top: 1px dashed var(--border); padding-top: 1rem; margin-top: 1rem;">
+                    <div class="idea-number">SOL-R</div>
+                    <div class="idea-text"><strong>Root Cause Solution:</strong> Implement a physical memory simulator (Memory Layout Engine) inside the extraction and generation subagents.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Failure Analysis -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 9</span>
+                    Failure Analysis
+                </div>
+            </div>
+            <div class="idea-list">
+                <div class="idea-item">
+                    <div class="idea-number">FLA-01</div>
+                    <div class="idea-text"><strong>What broke:</strong> A test suite failed because "123.45" was written in COMP-3 as "01 23 45" without a sign nibble, leading to S0C7 abends.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-02</div>
+                    <div class="idea-text"><strong>Why:</strong> The generator script treated COMP-3 as simple packed decimal without the trailing sign nibble ('C' for positive, 'D' for negative, 'F' for unsigned).</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-03</div>
+                    <div class="idea-text"><strong>Lesson:</strong> Mainframe data formats are extremely picky about sign representation in hex nibbles (low-order digit holds the sign).</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-04</div>
+                    <div class="idea-text"><strong>Mitigation:</strong> Implement a strict binary verification stage in the generator that validates sign nibble compliance on all COMP-3 fields.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-05</div>
+                    <div class="idea-text"><strong>Failure:</strong> REDEFINES overlapping fields were generated with conflicting values (e.g. both First-Name and Policy-Num were filled, corrupted each other).</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-06</div>
+                    <div class="idea-text"><strong>Why:</strong> The generator did not know that only one REDEFINES variant can be populated per record stream.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-07</div>
+                    <div class="idea-text"><strong>Lesson:</strong> Redefined variables occupy the exact same physical byte space and are mutually exclusive.</div>
+                </div>
+                <div class="idea-item">
+                    <div class="idea-number">FLA-08</div>
+                    <div class="idea-text"><strong>Mitigation:</strong> Implement mutually exclusive logic path selectors so that only the chosen branch's fields are generated, and other overlapping bytes are cleared/padded.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. Morphological Analysis -->
+        <div class="technique-group">
+            <div class="technique-header">
+                <div class="technique-title">
+                    <span class="technique-badge">Technique 10</span>
+                    Morphological Synthesis Matrix
+                </div>
+            </div>
+            <div class="idea-list">
+                <p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem; font-style: italic;">Breaking down the solution architecture across its six major dimension variables to combine the highest-scoring execution stack.</p>
+                <div class="visualization" style="line-height: 1.8;">
+                    <strong>[STACK DESIGN MATRIX]</strong><br>
+                    - Layout Parsing: <span style="color: var(--accent);">ANTLR AST (Strict, robust)</span><br>
+                    - Memory Overlap: <span style="color: var(--accent);">Python Memoryviews (Zero-copy shared buffers)</span><br>
+                    - Decimal Arithmetic: <span style="color: var(--accent);">Python Decimal class (Precision safety)</span><br>
+                    - Boundary Analysis: <span style="color: var(--accent);">Z3 SAT Constraint Solver (symbolic-style exact solutions)</span><br>
+                    - Traceability ID: <span style="color: var(--accent);">JSON Traceability Matrix + Embedded Hex Signatures</span><br>
+                    - UI Layer: <span style="color: var(--accent);">Interactive HTML Dashboard (Traceability Matrix + Coverage KPI)</span>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Made with IBM Bob</p>
+        </footer>
+    </div>
+</body>
+</html>

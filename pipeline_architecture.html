@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COBOL SMT Synthetic Test Data Pipeline — Deterministic vs AI Breakdown</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-card: #0f1422;
+      --bg-card-hover: #161d31;
+      --border-subtle: #1e2942;
+      --border-glow: #38bdf840;
+      --primary: #38bdf8;
+      --primary-glow: #38bdf840;
+      --accent-purple: #a855f7;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --code-bg: #0b0f19;
+
+      /* Paradigm colors */
+      --color-det: #06b6d4;
+      --color-det-bg: rgba(6, 182, 212, 0.12);
+      --color-det-border: rgba(6, 182, 212, 0.4);
+      --color-ai: #a855f7;
+      --color-ai-bg: rgba(168, 85, 247, 0.12);
+      --color-ai-border: rgba(168, 85, 247, 0.4);
+      --color-hybrid: #3b82f6;
+      --color-hybrid-bg: rgba(59, 130, 246, 0.12);
+      --color-hybrid-border: rgba(59, 130, 246, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    }
+
+    header {
+      padding: 3rem 2rem 2rem;
+      text-align: center;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .badge-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .badge-primary {
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: var(--primary);
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .legend-det {
+      background: var(--color-det-bg);
+      border: 1px solid var(--color-det-border);
+      color: var(--color-det);
+    }
+
+    .legend-ai {
+      background: var(--color-ai-bg);
+      border: 1px solid var(--color-ai-border);
+      color: var(--color-ai);
+    }
+
+    .legend-hybrid {
+      background: var(--color-hybrid-bg);
+      border: 1px solid var(--color-hybrid-border);
+      color: var(--color-hybrid);
+    }
+
+    h1 {
+      font-size: 2.75rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 30%, #94a3b8 100%);
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem;
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 1.125rem;
+      max-width: 860px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1rem 2rem 4rem;
+    }
+
+    /* Comparison Banner */
+    .comparison-banner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    @media (max-width: 800px) {
+      .comparison-banner {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .banner-box {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .banner-box.det {
+      border: 1px solid var(--color-det-border);
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), transparent);
+    }
+
+    .banner-box.ai {
+      border: 1px solid var(--color-ai-border);
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), transparent);
+    }
+
+    .banner-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+
+    .banner-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .banner-box.det h4 { color: var(--color-det); }
+    .banner-box.ai h4 { color: var(--accent-purple); }
+
+    .banner-content p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Example Walkthrough Box */
+    .example-walkthrough-section {
+      background: #0d121f;
+      border: 1px solid #1e293b;
+      border-radius: 18px;
+      padding: 2rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .example-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .example-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 950px) {
+      .example-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Interactive Pipeline Navigation */
+    .pipeline-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 0.75rem 1.25rem;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+    }
+
+    .tab-btn:hover {
+      background: var(--bg-card-hover);
+      color: var(--text-main);
+      border-color: var(--border-glow);
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(168, 85, 247, 0.15));
+      border-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.2);
+    }
+
+    .tab-num {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-family: 'Fira Code', monospace;
+    }
+
+    /* Pipeline Flow Grid */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+      position: relative;
+    }
+
+    @media (max-width: 1200px) {
+      .flow-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .flow-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .stage-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.5rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .stage-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: transparent;
+      transition: background 0.3s ease;
+    }
+
+    .stage-card:hover {
+      transform: translateY(-4px);
+      background: var(--bg-card-hover);
+      border-color: var(--border-glow);
+    }
+
+    .stage-card.active {
+      border-color: var(--primary);
+      background: #141c2e;
+      box-shadow: 0 10px 30px -10px rgba(56, 189, 248, 0.3);
+    }
+
+    .stage-card.active::before {
+      background: linear-gradient(90deg, var(--primary), var(--accent-purple));
+    }
+
+    .stage-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.85rem;
+    }
+
+    .stage-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .stage-type-pill {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .pill-det {
+      background: var(--color-det-bg);
+      color: var(--color-det);
+      border: 1px solid var(--color-det-border);
+    }
+
+    .pill-ai {
+      background: var(--color-ai-bg);
+      color: var(--accent-purple);
+      border: 1px solid var(--color-ai-border);
+    }
+
+    .pill-hybrid {
+      background: var(--color-hybrid-bg);
+      color: var(--color-hybrid);
+      border: 1px solid var(--color-hybrid-border);
+    }
+
+    .stage-step {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.725rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .stage-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text-main);
+    }
+
+    .stage-desc {
+      font-size: 0.825rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Live Interactive Inspector View */
+    .inspector-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 900px) {
+      .inspector-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .inspector-left h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .approach-badge {
+      font-size: 0.75rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .why-approach-box {
+      background: rgba(255, 255, 255, 0.03);
+      border-left: 3px solid var(--primary);
+      padding: 0.85rem 1rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1.25rem;
+      font-size: 0.875rem;
+      color: #e2e8f0;
+      line-height: 1.5;
+    }
+
+    .inspector-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 1.25rem;
+    }
+
+    .key-points {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .key-points li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: #cbd5e1;
+    }
+
+    .key-points li svg {
+      flex-shrink: 0;
+      margin-top: 3px;
+      color: var(--accent-emerald);
+    }
+
+    /* Code Viewer */
+    .code-box {
+      background: var(--code-bg);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .code-header {
+      background: #0f1422;
+      padding: 0.6rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .code-title {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .code-title::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-purple);
+    }
+
+    pre {
+      padding: 1.25rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.825rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      overflow-x: auto;
+    }
+
+    .syntax-kw { color: #f43f5e; font-weight: 600; }
+    .syntax-fn { color: #38bdf8; }
+    .syntax-str { color: #10b981; }
+    .syntax-num { color: #f59e0b; }
+    .syntax-comment { color: #64748b; font-style: italic; }
+
+    /* Deep Dive: How Deterministic Classification Works */
+    .deepdive-section {
+      margin-top: 3.5rem;
+    }
+
+    .deepdive-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 1.25rem;
+    }
+
+    @media (max-width: 950px) {
+      .deepdive-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .deepdive-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .deepdive-card.happy-logic { border-left: 4px solid var(--accent-emerald); }
+    .deepdive-card.error-logic { border-left: 4px solid var(--accent-rose); }
+    .deepdive-card.boundary-logic { border-left: 4px solid var(--accent-amber); }
+
+    .deepdive-header {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .deepdive-icon {
+      font-size: 1.35rem;
+    }
+
+    .deepdive-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .deepdive-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1.25rem;
+    }
+
+    .math-formula-box {
+      background: #090d16;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.78rem;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+
+    .logic-step-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      font-size: 0.825rem;
+      color: #cbd5e1;
+    }
+
+    .logic-step-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .step-bullet {
+      background: rgba(255, 255, 255, 0.08);
+      color: #94a3b8;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* Mock Engine Interactive Step Box */
+    .mock-deepdive-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 950px) {
+      .mock-deepdive-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .mock-flow-step {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .mock-step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(56, 189, 248, 0.2);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .mock-step-content h5 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 0.25rem;
+    }
+
+    .mock-step-content p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Output Section Grid */
+    .output-section {
+      margin-top: 3.5rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .artifact-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .artifact-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .artifact-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+    }
+
+    .artifact-card.happy { border-top: 4px solid var(--accent-emerald); }
+    .artifact-card.error { border-top: 4px solid var(--accent-rose); }
+    .artifact-card.boundary { border-top: 4px solid var(--accent-amber); }
+
+    .artifact-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .artifact-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .badge-happy { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); }
+    .badge-error { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); }
+    .badge-boundary { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
+
+    .artifact-name {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .artifact-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .mock-panel {
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.05), rgba(56, 189, 248, 0.05));
+      border: 1px dashed rgba(168, 85, 247, 0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .mock-info h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .mock-info p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .mock-chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .mock-chip {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-main);
+    }
+
+    /* Summary Table Matrix */
+    .matrix-section {
+      margin-top: 3.5rem;
+    }
+
+    .matrix-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .matrix-table th, .matrix-table td {
+      padding: 1rem 1.25rem;
+      text-align: left;
+      font-size: 0.875rem;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .matrix-table th {
+      background: #0c101c;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    .matrix-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .matrix-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 0;
+      color: #64748b;
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border-subtle);
+      margin-top: 4rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge-bar">
+      <div class="badge badge-primary">COBOL SMT Synthetic Data Pipeline</div>
+      <div class="legend-chip legend-det">⚙ Deterministic / SMT</div>
+      <div class="legend-chip legend-ai">🧠 AI / LLM</div>
+      <div class="legend-chip legend-hybrid">⚡ Hybrid Pipeline</div>
+    </div>
+    <h1>Pipeline Architecture: Deterministic vs. AI Division</h1>
+    <p class="subtitle">A zero-hallucination architecture: Mathematical & AST constraints are computed 100% deterministically via Z3 & SQLite, while AI is strictly used for semantic natural language extraction & realistic entity enrichment.</p>
+  </header>
+
+  <div class="container">
+
+    <!-- Top Paradigm Comparison Banner -->
+    <div class="comparison-banner">
+      <div class="banner-box det">
+        <div class="banner-icon">⚙️</div>
+        <div class="banner-content">
+          <h4>Deterministic Core (Z3 SMT + AST Parsing + Memory Overlays)</h4>
+          <p><strong>Zero Hallucination:</strong> Guarantees mathematically exact branch traversal, precise PIC capacity enforcement, boundary limits, and byte-accurate EBCDIC/COMP-3 binary packing.</p>
+        </div>
+      </div>
+      <div class="banner-box ai">
+        <div class="banner-icon">🧠</div>
+        <div class="banner-content">
+          <h4>AI & LLM Enrichment (BRD Extraction + Data Dictionary Context)</h4>
+          <p><strong>Natural Language & Semantic Realism:</strong> Synthesizes messy COBOL comments into clean business rules and replaces dummy math numbers with realistic names, valid addresses & credit cards.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCRETE EXAMPLE WALKTHROUGH SECTION -->
+    <div class="example-walkthrough-section">
+      <div class="example-header">
+        <div class="example-title">
+          <span>🏦 Concrete Banking Example: Loan Evaluation (LNVAL01.cbl)</span>
+        </div>
+        <span class="stage-type-pill pill-det">Real-World Case Study</span>
+      </div>
+
+      <div class="example-grid">
+        <!-- COBOL Source Code Snippet -->
+        <div class="code-box">
+          <div class="code-header">
+            <span class="code-title">LNVAL01.cbl (Target Business Rule BR-04)</span>
+            <span style="color:#64748b; font-size:0.75rem;">COBOL SOURCE</span>
+          </div>
+          <pre><code><span class="syntax-kw">1000-FETCH-DB2-DATA.</span>
+    EXEC SQL 
+        SELECT CREDIT_SCORE, CUST_TIER 
+        INTO  :DB-CREDIT-SCORE, :DB-TIER
+        FROM   CUSTOMER_TABLE 
+        WHERE  CUST_ID = :IN-CUST-ID
+    END-EXEC.
+    <span class="syntax-fn">IF SQLCODE NOT = 0</span> PERFORM 9100-DB-ERR.
+
+<span class="syntax-kw">2000-READ-VSAM-DATA.</span>
+    MOVE IN-CUST-ID TO VSAM-ACCT-NO.
+    READ ACCT-FILE KEY IS VSAM-ACCT-NO.
+    <span class="syntax-fn">IF WS-FILE-STATUS NOT = '00'</span> PERFORM 9200-VSAM-ERR.
+
+<span class="syntax-kw">3000-EVALUATE-RISK.</span>
+    <span class="syntax-fn">IF IN-LOAN-AMOUNT <= 50000.00</span>
+       <span class="syntax-fn">AND DB-CREDIT-SCORE >= 700</span>
+       <span class="syntax-fn">AND VSAM-OVERDRAFT-CNT = 0</span>
+       <span class="syntax-fn">AND DB-TIER = 'GOLD'</span>
+        MOVE 'APPROVED-TIER-1' TO WS-RESULT
+    ELSE
+        MOVE 'REJECTED'        TO WS-RESULT
+    END-IF.</code></pre>
+        </div>
+
+        <!-- Generated Synchronized Test Payload -->
+        <div class="code-box">
+          <div class="code-header">
+            <span class="code-title">01_happy_path.json + Mocks</span>
+            <span style="color:#10b981; font-size:0.75rem;">CO-SOLVED PAYLOAD</span>
+          </div>
+          <pre><code>{
+  <span class="syntax-kw">"scenario"</span>: <span class="syntax-str">"HAPPY_PATH_TIER1_APPROVAL"</span>,
+  <span class="syntax-kw">"program_inputs"</span>: {
+    <span class="syntax-str">"IN_CUST_ID"</span>: <span class="syntax-str">"CUST1001"</span>,
+    <span class="syntax-str">"IN_LOAN_AMOUNT"</span>: <span class="syntax-num">25000.00</span>
+  },
+  <span class="syntax-kw">"external_mocks"</span>: {
+    <span class="syntax-kw">"db2_queries"</span>: [{
+      <span class="syntax-str">"where_cust_id"</span>: <span class="syntax-str">"CUST1001"</span>, <span class="syntax-comment">// <-- Matches Input</span>
+      <span class="syntax-str">"SQLCODE"</span>: <span class="syntax-num">0</span>,
+      <span class="syntax-str">"CREDIT_SCORE"</span>: <span class="syntax-num">750</span>,
+      <span class="syntax-str">"CUST_TIER"</span>: <span class="syntax-str">"GOLD"</span>
+    }],
+    <span class="syntax-kw">"vsam_reads"</span>: [{
+      <span class="syntax-str">"key_acct_no"</span>: <span class="syntax-str">"CUST1001"</span>,  <span class="syntax-comment">// <-- Matches Input</span>
+      <span class="syntax-str">"FILE_STATUS"</span>: <span class="syntax-str">"00"</span>,
+      <span class="syntax-str">"OVERDRAFT_CNT"</span>: <span class="syntax-num">0</span>
+    }]
+  },
+  <span class="syntax-kw">"expected_outcome"</span>: {
+    <span class="syntax-str">"WS_RESULT"</span>: <span class="syntax-str">"APPROVED-TIER-1"</span>
+  }
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Deep-Dive Section 1: How Deterministic Classification Works -->
+    <div class="deepdive-section">
+      <div class="section-title">
+        <span>🔬 How the Deterministic Engine Identifies Happy, Error & Boundary Paths</span>
+      </div>
+
+      <div class="deepdive-grid">
+
+        <!-- Happy Path Logic -->
+        <div class="deepdive-card happy-logic">
+          <div>
+            <div class="deepdive-header">
+              <span class="deepdive-icon">🟢</span>
+              <div class="deepdive-title">Happy Path Identification</div>
+            </div>
+            <div class="deepdive-desc">
+              Identified by tracing the CFG path from program <code>ENTRY</code> to the <code>SUCCESS_SINK</code> paragraph, conjoining all gatekeeper predicates into a single satisfiable formula.
+            </div>
+            <div class="math-formula-box">
+              Φ_Happy = ⋀ P_i(X) ∧ (SQLCODE == 0) ∧ (FILE_STATUS == "00")
+            </div>
+            <ul class="logic-step-list">
+              <li><span class="step-bullet">1</span> <strong>AST Sink Classification:</strong> Labels normal exit & approval nodes as target terminal.</li>
+              <li><span class="step-bullet">2</span> <strong>Conjunction of True Branches:</strong> Traverses all IF / EVALUATE blocks taking True branch.</li>
+              <li><span class="step-bullet">3</span> <strong>Central Nominal Value:</strong> Z3 solves for interior numbers within valid ranges.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Error Path Logic -->
+        <div class="deepdive-card error-logic">
+          <div>
+            <div class="deepdive-header">
+              <span class="deepdive-icon">🔴</span>
+              <div class="deepdive-title">Error Path Identification</div>
+            </div>
+            <div class="deepdive-desc">
+              Identified by systematically applying <strong>Weakest Precondition Inversion</strong> (negating each branch gatekeeper individually) and injecting external dependency failure codes.
+            </div>
+            <div class="math-formula-box">
+              Φ_Error_k = (⋀_{i < k} P_i) ∧ ¬P_k ∨ (SQLCODE == 100)
+            </div>
+            <ul class="logic-step-list">
+              <li><span class="step-bullet">1</span> <strong>Branch Inversion:</strong> Negates branch condition <em>k</em> while keeping prior steps valid.</li>
+              <li><span class="step-bullet">2</span> <strong>AST Error Sinks:</strong> Targets nodes with <code>ROLLBACK</code>, <code>ABEND</code>, or error return codes.</li>
+              <li><span class="step-bullet">3</span> <strong>Dependency Fault Injection:</strong> Solves for DB2 +100/-911 and VSAM '23' not-found states.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Boundary Path Logic -->
+        <div class="deepdive-card boundary-logic">
+          <div>
+            <div class="deepdive-header">
+              <span class="deepdive-icon">🟡</span>
+              <div class="deepdive-title">Boundary Identification</div>
+            </div>
+            <div class="deepdive-desc">
+              Identified by analyzing relational AST comparison operators (<code>&gt;=</code>, <code>&lt;=</code>, <code>&lt;</code>, <code>&gt;</code>) and calculating the 4 deterministic edge points around every limit.
+            </div>
+            <div class="math-formula-box">
+              Points = { Limit, Limit - ε, Limit + ε, Min(PIC), Max(PIC) }
+            </div>
+            <ul class="logic-step-list">
+              <li><span class="step-bullet">1</span> <strong>Operator Parsing:</strong> Extracts threshold literal <code>L</code> from <code>IF X &gt;= L</code>.</li>
+              <li><span class="step-bullet">2</span> <strong>Discrete Step Calculation:</strong> Generates $X = L$, $X = L-1$, and $X = L+1$.</li>
+              <li><span class="step-bullet">3</span> <strong>Type Physical Extremes:</strong> PIC 9(6) bounds (<code>000000</code> to <code>999999</code>, HIGH/LOW-VALUES).</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Deep-Dive Section 2: How Symbolic Execution Generates External Dependencies -->
+    <div class="deepdive-section">
+      <div class="section-title">
+        <span>🔗 How External Dependency Mocks are Generated via Symbolic Execution</span>
+      </div>
+
+      <div class="mock-deepdive-box">
+        <div>
+          <div class="mock-flow-step">
+            <div class="mock-step-num">1</div>
+            <div class="mock-step-content">
+              <h5>Treat Dependency Outputs as Free Symbolic Variables</h5>
+              <p>When the AST encounters an <code>EXEC SQL SELECT</code> or <code>READ VSAM</code>, the output columns (e.g. <code>CREDIT_SCORE</code>) and status codes (<code>SQLCODE</code>) are treated as unknown symbolic inputs in Z3, rather than static constants.</p>
+            </div>
+          </div>
+
+          <div class="mock-flow-step">
+            <div class="mock-step-num">2</div>
+            <div class="mock-step-content">
+              <h5>Bind Primary Input Keys to Query Predicates</h5>
+              <p>The WHERE clause key (e.g. <code>WHERE CUST_ID = :IN-CUSTOMER-ID</code>) is bound via equality constraints: <code>MOCK_DB_KEY == IN_CUSTOMER_ID</code>.</p>
+            </div>
+          </div>
+
+          <div class="mock-flow-step">
+            <div class="mock-step-num">3</div>
+            <div class="mock-step-content">
+              <h5>Single Co-Solved SMT Equation System</h5>
+              <p>Z3 solves primary inputs and mock return values simultaneously in one pass, ensuring mathematical harmony between what the program passes in and what the mock returns.</p>
+            </div>
+          </div>
+
+          <div class="mock-flow-step">
+            <div class="mock-step-num">4</div>
+            <div class="mock-step-content">
+              <h5>AST-Driven Split into Primary vs Mock Artifacts</h5>
+              <p>The unified solver model is split into <code>01_happy_path.json</code> (inputs) and <code>mocks/sql_mock_data.json</code> (mock DB rows with exact matching keys).</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="code-box">
+            <div class="code-header">
+              <span class="code-title">smt_mock_formulation.py</span>
+              <span style="color:#64748b; font-size:0.75rem;">Z3 CO-SOLVING ENGINE</span>
+            </div>
+            <pre><code><span class="syntax-comment"># 1. Primary Program Inputs</span>
+in_cust_id = String(<span class="syntax-str">'IN_CUST_ID'</span>)
+in_loan_amt = Real(<span class="syntax-str">'IN_LOAN_AMOUNT'</span>)
+
+<span class="syntax-comment"># 2. Dependency Outputs as Free Symbolic Vars</span>
+mock_score = Int(<span class="syntax-str">'DB_CREDIT_SCORE'</span>)
+mock_tier = String(<span class="syntax-str">'DB_CUST_TIER'</span>)
+mock_sqlcode = Int(<span class="syntax-str">'SQLCODE'</span>)
+
+<span class="syntax-comment"># 3. Downstream COBOL logic constraint:</span>
+<span class="syntax-comment"># IF SQLCODE = 0 AND WS-SCORE >= 650</span>
+s.add(mock_sqlcode == <span class="syntax-num">0</span>)
+s.add(mock_score >= <span class="syntax-num">650</span>)
+
+<span class="syntax-comment"># When solved: Primary Key matches Mock Key!</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Tabs -->
+    <div class="pipeline-tabs" id="pipelineTabs" style="margin-top: 3.5rem;">
+      <button class="tab-btn active" onclick="selectStage(0)"><span class="tab-num">01</span> BRD Rule Extraction</button>
+      <button class="tab-btn" onclick="selectStage(1)"><span class="tab-num">02</span> CFG Backward Slicing</button>
+      <button class="tab-btn" onclick="selectStage(2)"><span class="tab-num">03</span> Z3 SMT Constraint Solving</button>
+      <button class="tab-btn" onclick="selectStage(3)"><span class="tab-num">04</span> Dependency Mock Sync</button>
+      <button class="tab-btn" onclick="selectStage(4)"><span class="tab-num">05</span> Semantic Enrichment</button>
+      <button class="tab-btn" onclick="selectStage(5)"><span class="tab-num">06</span> Binary EBCDIC Codec</button>
+    </div>
+
+    <!-- Interactive Grid Cards -->
+    <div class="flow-grid" id="flowGrid">
+      
+      <!-- Stage 1 -->
+      <div class="stage-card active" onclick="selectStage(0)">
+        <div>
+          <div class="stage-card-header">
+            <div class="stage-icon">📋</div>
+            <span class="stage-type-pill pill-hybrid">AI + AST</span>
+          </div>
+          <div class="stage-step">STAGE 01</div>
+          <div class="stage-title">BRD Cataloging</div>
+        </div>
+        <div class="stage-desc">AI extracts business rules from AST & comments; User picks target rule.</div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div class="stage-card" onclick="selectStage(1)">
+        <div>
+          <div class="stage-card-header">
+            <div class="stage-icon">🧭</div>
+            <span class="stage-type-pill pill-det">100% Deterministic</span>
+          </div>
+          <div class="stage-step">STAGE 02</div>
+          <div class="stage-title">CFG Slicing</div>
+        </div>
+        <div class="stage-desc">SQL AST back-substitutes assignments from root to target rule.</div>
+      </div>
+
+      <!-- Stage 3 -->
+      <div class="stage-card" onclick="selectStage(2)">
+        <div>
+          <div class="stage-card-header">
+            <div class="stage-icon">⚡</div>
+            <span class="stage-type-pill pill-det">100% Deterministic</span>
+          </div>
+          <div class="stage-step">STAGE 03</div>
+          <div class="stage-title">Z3 SMT Solver</div>
+        </div>
+        <div class="stage-desc">Pure math: Solves Happy, Error & Boundary inequality limits.</div>
+      </div>
+
+      <!-- Stage 4 -->
+      <div class="stage-card" onclick="selectStage(3)">
+        <div>
+          <div class="stage-card-header">
+            <div class="stage-icon">🔗</div>
+            <span class="stage-type-pill pill-det">100% Deterministic</span>
+          </div>
+          <div class="stage-step">STAGE 04</div>
+          <div class="stage-title">Mock Sync</div>
+        </div>
+        <div class="stage-desc">Mathematical co-solving for DB2 SQLCODE, VSAM & CICS return codes.</div>
+      </div>
+
+      <!-- Stage 5 -->
+      <div class="stage-card" onclick="selectStage(4)">
+        <div>
+          <div class="stage-card-header">
+            <div class="stage-icon">✨</div>
+            <span class="stage-type-pill pill-ai">100% AI / LLM</span>
+          </div>
+          <div class="stage-step">STAGE 05</div>
+          <div class="stage-title">Semantic LLM</div>
+        </div>
+        <div class="stage-desc">Enriches raw math into realistic names, dates & cards via Data Dictionary.</div>
+      </div>
+
+      <!-- Stage 6 -->
+      <div class="stage-card" onclick="selectStage(5)">
+        <div>
+          <div class="stage-card-header">
+            <div class="stage-icon">📦</div>
+            <span class="stage-type-pill pill-det">100% Deterministic</span>
+          </div>
+          <div class="stage-step">STAGE 06</div>
+          <div class="stage-title">Binary Overlay</div>
+        </div>
+        <div class="stage-desc">Memoryview ctypes pack bytes into EBCDIC, COMP-3 & REDEFINES.</div>
+      </div>
+
+    </div>
+
+    <!-- Detailed Inspector Panel -->
+    <div class="inspector-panel" id="inspectorPanel">
+      <div class="inspector-left">
+        <h3 id="panelTitle">
+          <span>01. Business Rule Extraction (BRD)</span>
+          <span class="approach-badge" id="panelBadge">HYBRID (AST + AI)</span>
+        </h3>
+        
+        <div class="why-approach-box" id="whyBox">
+          <strong>Why this approach?</strong> AST parser extracts precise paragraph lines & branch boundaries deterministically; LLM translates raw COBOL logic & comments into human-readable business rules.
+        </div>
+
+        <p class="inspector-text" id="panelDesc">
+          Scans the workspace metadata to extract all decision points, EVALUATE blocks, and Level-88 conditions into business rules. The developer selects a specific rule to target rather than testing the entire monolith at once.
+        </p>
+        
+        <ul class="key-points" id="panelPoints">
+          <li>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Interactive selection of target rule (e.g. BR-04 Tiered Risk Assessment)
+          </li>
+          <li>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Direct mapping from business criteria to COBOL Paragraph AST nodes
+          </li>
+          <li>
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            Eliminates whole-program path explosion by focusing the SMT solver
+          </li>
+        </ul>
+      </div>
+
+      <div class="inspector-right">
+        <div class="code-box">
+          <div class="code-header">
+            <span class="code-title" id="codeFilename">brd_catalog.json</span>
+            <span style="color:#64748b; font-size:0.75rem;" id="codeType">HYBRID SCHEMA</span>
+          </div>
+          <pre><code id="codeSnippet">{
+  <span class="syntax-kw">"rule_id"</span>: <span class="syntax-str">"BR-04"</span>,
+  <span class="syntax-kw">"rule_name"</span>: <span class="syntax-str">"Tiered Risk Assessment"</span>,
+  <span class="syntax-kw">"target_paragraphs"</span>: [
+    <span class="syntax-str">"3000-EVALUATE-RISK"</span>, 
+    <span class="syntax-str">"3100-TIER-ASSIGN"</span>
+  ],
+  <span class="syntax-kw">"trigger_criteria"</span>: <span class="syntax-str">"IN-SCORE >= 650 AND OVERDRAFT-COUNT = 0"</span>
+}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Test Suite Breakdown -->
+    <div class="output-section">
+      <div class="section-title">
+        <span>📁 Output Test Artifact Suite</span>
+        <span style="font-size: 0.85rem; font-weight: 400; color: var(--text-muted);">(Generated per Business Rule)</span>
+      </div>
+
+      <div class="artifact-cards">
+        
+        <div class="artifact-card happy">
+          <div class="artifact-header-row">
+            <span class="artifact-badge badge-happy">01_happy_path.json</span>
+            <span class="stage-type-pill pill-det">Deterministic Math</span>
+          </div>
+          <div class="artifact-name">Happy Path Suite</div>
+          <div class="artifact-desc">Valid input variables and successful dependency return codes (SQLCODE 0, FILE STATUS 00, EIBRESP NORMAL) driving clean execution to positive rule outcome.</div>
+          <div style="font-family:'Fira Code', monospace; font-size:0.75rem; color:var(--accent-emerald);">✔ Status: Success (Rule Approved)</div>
+        </div>
+
+        <div class="artifact-card error">
+          <div class="artifact-header-row">
+            <span class="artifact-badge badge-error">02_error_paths.json</span>
+            <span class="stage-type-pill pill-det">Deterministic Math</span>
+          </div>
+          <div class="artifact-name">Error & Exception Paths</div>
+          <div class="artifact-desc">Systematic branch negation and dependency error injection (SQLCODE +100 Not Found, -911 Deadlock, VSAM 23 Key Not Found, CICS PGMIDERR).</div>
+          <div style="font-family:'Fira Code', monospace; font-size:0.75rem; color:var(--accent-rose);">✖ Status: Handled Exceptions & Rollbacks</div>
+        </div>
+
+        <div class="artifact-card boundary">
+          <div class="artifact-header-row">
+            <span class="artifact-badge badge-boundary">03_boundary_conditions.json</span>
+            <span class="stage-type-pill pill-det">Deterministic Math</span>
+          </div>
+          <div class="artifact-name">Boundary & Limit Cases</div>
+          <div class="artifact-desc">Mathematical edge values: Exact threshold (X = limit), off-by-one (limit ± 1), type limits (HIGH-VALUES, LOW-VALUES, 999999 for PIC 9(6)).</div>
+          <div style="font-family:'Fira Code', monospace; font-size:0.75rem; color:var(--accent-amber);">⚡ Status: Extreme Edge Constraints</div>
+        </div>
+
+      </div>
+
+      <!-- Coordinated Mock Status -->
+      <div class="mock-panel">
+        <div class="mock-info">
+          <h4>Synchronized External Dependency Mocks <span class="stage-type-pill pill-det" style="margin-left: 0.5rem;">Deterministic Binding</span></h4>
+          <p>Mocks are bound via SMT equations with primary inputs to guarantee path execution.</p>
+        </div>
+        <div class="mock-chips">
+          <div class="mock-chip">DB2 SQL Rows (SQLCODE)</div>
+          <div class="mock-chip">VSAM Records (FILE STATUS)</div>
+          <div class="mock-chip">CICS COMMAREA / Channels</div>
+          <div class="mock-chip">CALL Subprogram Params</div>
+          <div class="mock-chip">IBM MQ Payloads</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Methodology Breakdown Matrix -->
+    <div class="matrix-section">
+      <div class="section-title">
+        <span>📊 Deterministic vs. AI Division of Responsibilities</span>
+      </div>
+
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th>Stage / Component</th>
+            <th>Approach Type</th>
+            <th>Underlying Technology</th>
+            <th>Primary Benefit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Rule Extraction</strong></td>
+            <td><span class="legend-chip legend-hybrid">Hybrid</span></td>
+            <td>Scanner SQLite AST + LLM Interpretation</td>
+            <td>Bridges low-level code blocks with natural business concepts</td>
+          </tr>
+          <tr>
+            <td><strong>2. CFG Path Slicing</strong></td>
+            <td><span class="legend-chip legend-det">Deterministic</span></td>
+            <td>Graph Theory + SQL Recursive CTEs</td>
+            <td>100% path accuracy, zero skipped branches or hallucinations</td>
+          </tr>
+          <tr>
+            <td><strong>3. SMT Path Solving</strong></td>
+            <td><span class="legend-chip legend-det">Deterministic</span></td>
+            <td>Z3 SMT Solver (First-Order Logic)</td>
+            <td>Mathematically guaranteed boundary values and branch satisfaction</td>
+          </tr>
+          <tr>
+            <td><strong>4. Dependency Mocking</strong></td>
+            <td><span class="legend-chip legend-det">Deterministic</span></td>
+            <td>SMT Key Binding & Return Code Solver</td>
+            <td>Exact synchronization between input keys and mock table rows</td>
+          </tr>
+          <tr>
+            <td><strong>5. Semantic Enrichment</strong></td>
+            <td><span class="legend-chip legend-ai">AI / LLM</span></td>
+            <td>watsonx / OpenAI + Data Dictionary (DD.json)</td>
+            <td>Realistic human names, real-looking addresses & valid dates</td>
+          </tr>
+          <tr>
+            <td><strong>6. Memory Codec Packing</strong></td>
+            <td><span class="legend-chip legend-det">Deterministic</span></td>
+            <td>Python ctypes, struct & memoryview</td>
+            <td>Byte-level EBCDIC, COMP-3 & REDEFINES alignment for z/OS</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <footer>
+    Automated COBOL SMT Synthetic Data Generation Engine &bull; Deterministic Accuracy with AI-Driven Realism
+  </footer>
+
+  <script>
+    const stages = [
+      {
+        title: "01. Business Rule Extraction (BRD)",
+        approach: "HYBRID (AST + AI)",
+        approachClass: "pill-hybrid",
+        whyText: "<strong>Why this approach?</strong> AST parser extracts precise paragraph lines & branch boundaries deterministically; LLM translates raw COBOL logic & comments into human-readable business rules.",
+        desc: "Scans the workspace metadata to extract all decision points, EVALUATE blocks, and Level-88 conditions into business rules. The developer selects a specific rule to target rather than testing the entire monolith at once.",
+        points: [
+          "Interactive selection of target rule (e.g. BR-04 Tiered Risk Assessment)",
+          "Direct mapping from business criteria to COBOL Paragraph AST nodes",
+          "Eliminates whole-program path explosion by focusing the SMT solver"
+        ],
+        filename: "brd_catalog.json",
+        codeType: "HYBRID SCHEMA",
+        snippet: `{\n  "rule_id": "BR-04",\n  "rule_name": "Tiered Risk Assessment",\n  "target_paragraphs": [\n    "3000-EVALUATE-RISK", \n    "3100-TIER-ASSIGN"\n  ],\n  "trigger_criteria": "IN-SCORE >= 650 AND OVERDRAFT-COUNT = 0"\n}`
+      },
+      {
+        title: "02. CFG Pathfinding & Symbolic Slicing",
+        approach: "100% DETERMINISTIC",
+        approachClass: "pill-det",
+        whyText: "<strong>Why this approach?</strong> Path exploration must be mathematically sound without AI hallucinations. AST graph traversal and backward substitution are deterministic graph operations.",
+        desc: "Traverses all feasible execution paths from program ENTRY to the target rule paragraph. Queries the SQLite Scanner database to extract branch conditions and back-substitute intermediate calculated variables into root inputs.",
+        points: [
+          "SQL AST extraction of IF, EVALUATE, COMPUTE, and MOVE statements",
+          "Symbolic Back-Substitution: intermediate variables resolved into root inputs",
+          "Pruning unreachable and dead paths prior to solver execution"
+        ],
+        filename: "path_slice.sql",
+        codeType: "SQL AST QUERY",
+        snippet: `-- Extracting path conditions leading to Rule BR-04\nSELECT stmt_id, condition_expr, true_target, false_target\nFROM AST_BRANCH_NODES\nWHERE program_id = 'LNVAL01'\n  AND path_depth <= 14\nORDER BY execution_order ASC;`
+      },
+      {
+        title: "03. Z3 SMT Constraint Solving",
+        approach: "100% DETERMINISTIC (Z3 SMT)",
+        approachClass: "pill-det",
+        whyText: "<strong>Why this approach?</strong> LLMs cannot reliably calculate multi-variable integer linear inequalities or precision boundaries. Z3 solver guarantees 100% mathematical satisfaction.",
+        desc: "Converts COBOL PIC ranges, decimal arithmetic, and branch logic into First-Order Logic constraints. Solves for satisfying input vectors across Happy, Error, and Boundary domains.",
+        points: [
+          "Exact boundary solving: boundary, boundary - 1, boundary + 1",
+          "Systematic branch negation for exhaustive error path discovery",
+          "Enforces PIC capacities and binary packed-decimal arithmetic rules"
+        ],
+        filename: "solver_engine.py",
+        codeType: "Z3 PYTHON ENGINE",
+        snippet: `from z3 import Solver, Int, And, Or, sat\n\ns = Solver()\nin_score = Int('IN_SCORE')\noverdraft_count = Int('OVERDRAFT_COUNT')\n\n# Happy Path: Tier 1 approval\ns.add(in_score >= 650, in_score <= 850)\ns.add(overdraft_count == 0)\n\nif s.check() == sat:\n    model = s.model()\n    print(f"Generated Score: {model[in_score]}")`
+      },
+      {
+        title: "04. Coordinated Dependency Mocking",
+        approach: "100% DETERMINISTIC (SMT Binding)",
+        approachClass: "pill-det",
+        whyText: "<strong>Why this approach?</strong> Primary inputs and mock query responses (SQLCODE, FILE STATUS) must match exactly to avoid runtime test breakage. SMT equates keys and statuses directly.",
+        desc: "Downstream branch paths depend on external systems (EXEC SQL, READ VSAM, CICS LINK). The solver generates synchronized mock states alongside root inputs to steer execution.",
+        points: [
+          "DB2 SQL queries with matching primary keys and SQLCODE (0, 100, -911)",
+          "VSAM datasets with status codes ('00' normal, '23' not found)",
+          "CICS COMMAREA / MQ message buffers with response flags"
+        ],
+        filename: "sql_mock_data.json",
+        codeType: "SYNCHRONIZED MOCK",
+        snippet: `{\n  "query": "SELECT CREDIT_SCORE FROM CUST_TABLE WHERE ID = :IN-ID",\n  "bind_values": { "IN-ID": "CUST89210" },\n  "mock_response": {\n    "SQLCODE": 0,\n    "CREDIT_SCORE": 780,\n    "CUST_TIER": "GOLD"\n  }\n}`
+      },
+      {
+        title: "05. LLM Semantic Enrichment",
+        approach: "100% AI / LLM (Prompt + Data Dictionary)",
+        approachClass: "pill-ai",
+        whyText: "<strong>Why this approach?</strong> SMT solvers output abstract numbers ('AAAAA', 99999). LLMs excel at generating realistic context-aware names, addresses, and transaction narratives.",
+        desc: "Replaces raw mathematical dummy values from Z3 (e.g. 'AAAAAA' or 99999) with realistic, domain-accurate names, dates, addresses, and cards while strictly respecting Z3 inequalities.",
+        points: [
+          "Integrates with central Data Dictionary (DD.json) for domain context",
+          "Generates realistic credit cards (Luhn-valid) and realistic timestamps",
+          "Verification pass ensures LLM didn't alter mathematical boundary conditions"
+        ],
+        filename: "enriched_record.json",
+        codeType: "AI ENRICHED JSON",
+        snippet: `{\n  "IN_CUSTOMER_ID": "CUST89210",\n  "IN_CUSTOMER_NAME": "ELEANOR VANCE",\n  "IN_APPLICATION_DATE": "2026-11-13",\n  "IN_REQUESTED_AMOUNT": 25000.00,\n  "IN_LOAN_TERM_MONTHS": 36\n}`
+      },
+      {
+        title: "06. Binary Memory Overlay & EBCDIC Codec",
+        approach: "100% DETERMINISTIC (ctypes + struct)",
+        approachClass: "pill-det",
+        whyText: "<strong>Why this approach?</strong> Mainframe bit and byte layout must adhere to exact z/Architecture byte offsets. AI cannot generate raw binary buffers reliably.",
+        desc: "Packs the JSON test cases into exact mainframe binary byte layouts using Python ctypes and memoryview overlays, fully supporting EBCDIC, COMP-3, and REDEFINES.",
+        points: [
+          "Automatic compilation of copybook into ctypes.Structure memory overlays",
+          "Packed decimal (COMP-3) and zoned decimal (DISPLAY) packing",
+          "Byte-accurate binary output (.bin) ready for mainframe batch ingestion"
+        ],
+        filename: "memory_overlay.py",
+        codeType: "CTYPES OVERLAY",
+        snippet: `import ctypes\n\nclass CustRecord(ctypes.BigEndianStructure):\n    _pack_ = 1\n    _fields_ = [\n        ("cust_id", ctypes.c_char * 8),  # PIC X(8)\n        ("loan_amt", ctypes.c_uint32),   # PIC 9(6) COMP-3\n        ("term_mo", ctypes.c_uint16)     # PIC 9(4) COMP\n    ]\n\n# Packed directly to raw EBCDIC bytes`
+      }
+    ];
+
+    function selectStage(index) {
+      // Update Tab Buttons
+      const tabBtns = document.querySelectorAll('.tab-btn');
+      tabBtns.forEach((btn, i) => {
+        btn.classList.toggle('active', i === index);
+      });
+
+      // Update Stage Cards
+      const cards = document.querySelectorAll('.stage-card');
+      cards.forEach((card, i) => {
+        card.classList.toggle('active', i === index);
+      });
+
+      // Update Inspector Panel Content
+      const data = stages[index];
+      document.getElementById('panelTitle').innerHTML = `<span>${data.title}</span><span class="approach-badge ${data.approachClass}" id="panelBadge">${data.approach}</span>`;
+      document.getElementById('whyBox').innerHTML = data.whyText;
+      document.getElementById('panelDesc').innerText = data.desc;
+      
+      const pointsList = document.getElementById('panelPoints');
+      pointsList.innerHTML = data.points.map(pt => `
+        <li>
+          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          ${pt}
+        </li>
+      `).join('');
+
+      document.getElementById('codeFilename').innerText = data.filename;
+      document.getElementById('codeType').innerText = data.codeType;
+      document.getElementById('codeSnippet').innerHTML = escapeAndHighlight(data.snippet);
+    }
+
+    function escapeAndHighlight(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+  </script>
+</body>
+</html>

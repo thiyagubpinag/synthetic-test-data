@@ -1,0 +1,22 @@
+name: synthetic-test-data
+description: Synthetic COBOL test data application
+version: 0.0.1
+
+propertyGroups:
+  - name: cobol-copybooks
+    language: cobol
+    libraries:
+      - name: syslib
+        type: local
+        locations:
+          - "cobol"
+
+profiles:
+  - name: analysis
+    type: analysis
+    settings:
+      analysisScope:
+        - name: cobol-scope
+          locations:
+            - "cobol"
+      containsCics: true
